@@ -1,21 +1,54 @@
 #include <iostream>
-
 using namespace std;
-/* 
-Este programa calcula o peso ideal de uma pessoa com base na altura e no sexo, e também fornece uma tabela de macronutrientes recomendados para homens e mulheres.
-| Macronutriente  | Homens (por kg) | Mulheres (por kg) 
-| --------------- | --------------- | -----------------
-| **Proteína**    | 1.8–2.2 g       | 1.6–2.0 g         
-| **Gordura**     | 0.8–1 g         | 0.9–1.1 g         
-| **Carboidrato** | 4–6 g           | 3.5–5.5 g               
 
-*/
+#include <string>
+struct Alimento {
+    string nome;
+    float proteina;
+    float gordura;
+    float carbo;
+};
 
-int main(){
 
-    float pesoIdeal, altura, pesoAtual, Proteina, Gordura, Carboidrato, DIV = 0 ;
+float calculaPesoIdeal(char sexo, float altura){
+    if(sexo == 'M' || sexo == 'm') return (72.7 * altura) - 58;
+    else return (62.1 * altura) - 44.7;
+}
+
+
+void calculaMacros(float pesoIdeal, char sexo, float &Proteina, float &Gordura, float &Carbo){
+    if(sexo == 'M' || sexo == 'm'){
+        Proteina = pesoIdeal * 2.2;
+        Gordura = pesoIdeal * 1.0;
+        Carbo = pesoIdeal * 6.0;
+    } else {
+        Proteina = pesoIdeal * 2.0;
+        Gordura = pesoIdeal * 1.1;
+        Carbo = pesoIdeal * 5.5;
+    }
+}
+
+
+void calculaMacrosPrato(Alimento a, float quantidade, float &p, float &g, float &c){
+    p = (quantidade / 100.0) * a.proteina;
+    g = (quantidade / 100.0) * a.gordura;
+    c = (quantidade / 100.0) * a.carbo;
+}
+
+int main() {
+
+    Alimento banco[] = {
+        {"Arroz", 2.6, 0.3, 28.0},
+        {"Feijao", 9.0, 0.5, 27.0},
+        {"Frango", 31.0, 3.6, 0.0},
+        {"Ovo", 13.0, 11.0, 1.1},
+        {"Batata", 2.0, 0.1, 17.0},
+        {"Pao", 8.0, 1.5, 50.0}
+    };
+
+    float altura, pesoAtual, pesoIdeal;
     char sexo;
-    int vetor[2];
+
 
     cout << "Altura em cm: ";
     cin >> altura;
@@ -23,43 +56,77 @@ int main(){
     cout << "Peso em kg: ";
     cin >> pesoAtual;
 
-    cout << "Sexo (M para masculino, F para feminino): ";
+    cout << "Sexo (M/F): ";
     cin >> sexo;
 
-    if(sexo == 'M' || sexo == 'm'){
-        pesoIdeal = (72.7 * altura) - 58;
-        cout << "Seu peso ideal eh: " << pesoIdeal << " kg" << endl;
-    } else if(sexo == 'F' || sexo == 'f'){
-        pesoIdeal = (62.1  * altura) - 44.7;
-        cout << "Seu peso ideal eh: " << pesoIdeal << " kg" << endl;
-
-    }
-
-    // Cálculo dos macronutrientes
-    if(sexo == 'M' || sexo == 'm'){
-        Proteina = pesoIdeal * 2.2; // 2.2 g de proteína por kg
-        Gordura = pesoIdeal * 1; // 1 g de gordura por kg
-        Carboidrato = pesoIdeal * 6; // 6 g de carboidrato por kg
-    }   else if(sexo == 'F' || sexo == 'f'){
-        Proteina = pesoIdeal * 2.0; // 2.0 g de proteína por kg
-        Gordura = pesoIdeal * 1.1; // 1.1 g de gordura por kg
-        Carboidrato = pesoIdeal * 5.5; // 5.5 g de carboidrato por kg
-    } 
-
-    vetor[0] = Proteina;
-    vetor[1] = Gordura;
-    vetor[2] = Carboidrato;
-
-      cout << "===TABELA DE MACRONUTRIENTES===" << endl;
+    
+    pesoIdeal = calculaPesoIdeal(sexo, altura);
+    cout << "Seu peso ideal eh: " << pesoIdeal << " kg" << endl;
 
 
-       cout << vetor[0] << "g Proteina" << endl;
-       cout << vetor[1]  << "g Gordura" << endl;
-       cout << vetor[2]  << "g Carboidrato" << endl;
+    float Proteina, Gordura, Carboidrato;
+    calculaMacros(pesoIdeal, sexo, Proteina, Gordura, Carboidrato);
 
-      
+    cout << "\n===TABELA DE MACRONUTRIENTES POR KG===" << endl;
+    cout << Proteina << "g Proteina" << endl;
+    cout << Gordura << "g Gordura" << endl;
+    cout << Carboidrato << "g Carboidrato" << endl;
 
 
+    char continuar, opcao;
+    float totalProteina = 0, totalGordura = 0, totalCarbo = 0;
+
+    cout << "\nDeseja pesar quanto de macro tem em cada alimento do seu prato? (S/N): ";
+    cin >> opcao;
+
+    if(opcao == 's' || opcao == 'S'){
+       do {
+
+        cout << "\nEscolha o alimento no banco de dados: " << endl;
+        for(int i = 0; i < 6; i++){
+            cout << i+1 << ". " << banco[i].nome << endl;
+        }
+
+
+        int escolha;
+        cout << "Digite o numero do alimento: ";
+        cin >> escolha;
+        int indice = escolha - 1;
+
+
+        float quantidade, proteinaFinal, gorduraFinal, carboFinal;
+        cout << "Digite a quantidade em gramas: ";
+        cin >> quantidade;
+
+
+        calculaMacrosPrato(banco[indice], quantidade, proteinaFinal, gorduraFinal, carboFinal);
+
+
+        if(banco[indice].nome == "Arroz" || banco[indice].nome == "Batata" || banco[indice].nome == "Pao"){
+            cout << "Carboidratos: " << carboFinal << "g\n";
+        } else if(banco[indice].nome == "Frango" || banco[indice].nome == "Feijao"){
+            cout << "Proteina: " << proteinaFinal << "g\n";
+        } else if(banco[indice].nome == "Ovo"){
+            cout << "Proteina: " << proteinaFinal << "g\n";
+            cout << "Gordura: " << gorduraFinal << "g\n";
+        }
+
+
+        totalProteina += proteinaFinal;
+        totalGordura  += gorduraFinal;
+        totalCarbo    += carboFinal;
+
+        
+        cout << "Deseja adicionar outro alimento? (S/N): ";
+        cin >> continuar;
+
+    } while(continuar == 's' || continuar == 'S');
+
+        cout << "\n===Macros totais do prato===" << endl;
+        cout << totalProteina << "g Proteina\n";
+        cout << totalGordura  << "g Gordura\n";
+        cout << totalCarbo    << "g Carboidrato\n";
 
     return 0;
+}
 }
